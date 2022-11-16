@@ -27,7 +27,7 @@ void put_timing(char** module, int size){
 }
 
 void put_alignment(char** module, int version){
-	const char* list=get_alignment_list(version);
+	const unsigned char* list = get_alignment_list(version);
 	char pattern[3][5]={{1,1,1,1,1},{1,0,0,0,1},{1,0,1,0,1}};
 	for(int i=1; i<=list[0]; i++){
 		for(int j=1; j<=list[0]; j++){
@@ -65,7 +65,7 @@ char** gen_pattern_mask(int version){
 		mask[i][6]=0;
 	}
 	{
-		const char* list=get_alignment_list(version);
+		const unsigned char* list = get_alignment_list(version);
 		for(int i=1; i<=list[0]; i++){
 			for(int j=1; j<=list[0]; j++){
 				if(i==1){
@@ -223,7 +223,7 @@ void put_encoded_byte(BitField* bit, char* data, int len){
 }
 
 void get_generator(char* dst, int x){
-	char* a=malloc(x+1);
+	unsigned char* a=malloc(x+1);
 	a[0]=0; a[1]=0;
 	for(int n=1; n<x; n++){
 		dst[0]=(a[0]+n)%255;
@@ -247,8 +247,8 @@ void get_generator(char* dst, int x){
 }
 
 // bch code
-void encode2(char* dst, const char* msg, const char* gen, int a, int b){
-	char* rem=calloc(a+b, 1);
+void encode2(char* dst, const char* msg, const unsigned char* gen, int a, int b){
+	unsigned char* rem=calloc(a+b, 1);
 	memcpy(rem, msg, a);
 	
 	for(int n=a; n>0; n--){

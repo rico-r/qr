@@ -3,19 +3,18 @@
 #include <stdlib.h>
 #include <unistd.h> //used for test if given path is directory
 #include <sys/stat.h> //used for test if given path is readable
+#include <string.h>
 
 #include "qr.h"
 
 #include <jpeglib.h>
 #include <png.h>
 
-#define QUITE_ZONE 2
+#define QUITE_ZONE 4
 
-char* png_version(){
+void png_version(char *version){
 	int i = png_access_version_number();
-	char* v=malloc(9);
-	sprintf(v,"%d.%d.%d",i/10000,(i/100)%100,i%100);
-	return v;
+	sprintf(version, "%d.%d.%d", i / 10000, (i / 100) % 100, i % 100);
 }
 
 void write_png(char** data, int version, int zoom_factor, FILE* file){
@@ -26,7 +25,9 @@ void write_png(char** data, int version, int zoom_factor, FILE* file){
 	char row[width];
 	int y, x, i;
 	
-	png_structp png = png_create_write_struct(png_version(),0,0,0);
+	char png_version_str[9];
+	png_version(png_version_str);
+	png_structp png = png_create_write_struct(png_version_str, 0, 0, 0);
 	png_infop info = png_create_info_struct(png);
 	png_set_IHDR(png,info, width, width, 8, PNG_COLOR_TYPE_GRAY, 0,0,0);
 	png_init_io(png, file);
@@ -101,26 +102,29 @@ void print_module(char** data, int version, FILE* file){
 	const char *black = "\e[m  ";
 	for(x=0; x<QUITE_ZONE; x++){
 		for(y=-QUITE_ZONE; y<size+QUITE_ZONE; y++){
-			fprintf(file, white);
+			fprintf(file, "%s", white);
 		}
 		putchar('\n');
 	}
 	for(y=0; y<size; y++){
-		for(x=0; x<QUITE_ZONE; x++)
-			fprintf(file, white);
+		for(x=0; x<QUITE_ZONE; x++){
+			fprintf(file, "%s", white);
+		}
 		for(x=0; x<size; x++){
-			fprintf(file, data[y][x]==1?black:data[y][x]==2?"[]":white);
-		for(x=0; x<QUITE_ZONE; x++)
-			fprintf(file, white);
-		printf('\e[m\n');
+			fprintf(file, "%s", data[y][x] == 1 ? black : data[y][x] == 2 ? "[]" : white);
+		}
+		for(x=0; x<QUITE_ZONE; x++){
+			fprintf(file, "%s", white);
+		}
+		printf("\e[m\n");
 	}
 	for(x=0; x<QUITE_ZONE; x++){
 		for(y=-QUITE_ZONE; y<size+QUITE_ZONE; y++){
-			fprintf(file, white);
+			fprintf(file, "%s", white);
 		}
 		putchar('\n');
 	}
-	fprintf(file, "\e[m");
+	fprintf(file, "%s", "\e[m");
 }
 
 void append(char** dst, int* len1, char* a, int len2){
@@ -173,7 +177,10 @@ int read_file(char** dst, int* length, FILE* file){
 		}
 	}else{
 		char* r=(char*) malloc(len);
-		fread(r, len, 1, file);
+		int readed = fread(r, len, 1, file);
+		if(readed != len) {
+			// Error occour while reading file
+		}
 		append(dst, length, r, len);
 		free(r);
 	}
@@ -207,17 +214,17 @@ int get_supported_mode(const char* data, int len){
 "-f src  read data from src instead of stdin,\n"\
 "        if multiple data source is used\n"\
 "        the data will be combined in order\n"\
-"        they appear"\
+"        they appear\n"\
 "-o dst  output to dst instead of stdout,\n"\
 "        if multiple occurred the last\n"\
 "        one is used\n"\
-"-png    output png file (default)"\
-"-jpeg   output jpeg file"\
-"-print  print generated QR into terminal (experimental)"\
+"-png    output png file (default)\n"\
+"-jpeg   output jpeg file\n"\
+"-print  print generated QR into terminal (experimental)\n"\
 "supported mode:\n"\
 "   -auto  select automatically based on input (default).\n"\
 "   -num   numeric mode (number 0-9).\n"\
-"   -alp   alphanumeric mode (A-Z0-9 $%/*+-:)\n"\
+"   -alp   alphanumeric mode (A-Z0-9 $%%/*+-:)\n"\
 "   -byte  byte mode\n"\
 "if multiple mode occourred the last one is used.\n"\
 "if the data can not encoded with user\n"\
@@ -249,7 +256,8 @@ int main(int argc, char** argv){
 				goto usage;
 			}
 		}else if(!strcmp(v, "-d")){
-			append(&data, &len, argv[++i], strlen(argv[i]));
+			i++;
+			append(&data, &len, argv[i], strlen(argv[i]));
 		}else if(!strcmp(v, "-o")){
 			if(checkFile(argv[++i], 0)){
 				goto usage;

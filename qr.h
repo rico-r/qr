@@ -39,7 +39,7 @@ extern int LogTable[256];
 extern ECInfo ECInfoTable[160];
 
 int get_character_count_size(int version, CharacterMode mode);
-const char* get_alignment_list(int version);
+const unsigned char* get_alignment_list(int version);
 
 char** generate_qr(int* version_dst, char* data, int len, CharacterMode mode, CorrectionLevel clevel);
 

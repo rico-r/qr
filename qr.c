@@ -219,8 +219,8 @@ ECInfo ECInfoTable[160]={
 	{30, 20, 15, 61, 16}
 };
 
-const char* get_alignment_list(int version){
-	static char r[40][8]={
+const unsigned char* get_alignment_list(int version){
+	static u_int8_t r[40][8]={
 		{0},
 		{2, 6, 18},
 		{2, 6, 22},

@@ -16,7 +16,7 @@ qr.o: qr.c qr.h
 	$(CC) $(CFLAGS) -c qr.c
 
 bitfield.o: bitfield.c
-	$(CC) -c bitfield.c
+	$(CC) $(CFLAGS) -c bitfield.c
 
 main.o: main.c qr.h
 	$(CC) $(CFLAGS) -c main.c
